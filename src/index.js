@@ -56,10 +56,7 @@ let whatsTheValue =(event)=>{
   // form.reset()
   }
 
-
-
-
-
+  
 // const addNewToy =(name, url)=>{
 //   fetch("http://localhost:3000/toys",
 //   {
