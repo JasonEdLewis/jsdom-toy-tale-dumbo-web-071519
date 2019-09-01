@@ -6,20 +6,13 @@ let addToy = false
 
 const mainDiv = document.querySelector('#toy-collection');
     fetch('http://localhost:3000/toys')
-       .then(resp => resp.json())
-       .then(toys => setUpDivs(toys));
+      .then(resp => resp.json())
+      .then(toys =>
+      toys.forEach(toy => {
+        mainDiv.innerHTML += divs(toy.id, toy.name, toy.image, toy.likes);})
+      );
 
 
-
-const setUpDivs =(toys)=>{
-  toys.forEach(toy => {
-   mainDiv.innerHTML += divs(toy.id, toy.name, toy.image, toy.likes);
-  }
-    
-  );
-
-
-}
 
 const divs =(id,name, image,likes)=>{
   return `<div class="card" data-id=${id}>
@@ -30,6 +23,24 @@ const divs =(id,name, image,likes)=>{
   </div>`
 }
 // console.log(grabToys());
+mainDiv.addEventListener('click', (event) =>{
+
+  if(event.target.className === 'like-btn'){
+    likeNumStr= event.target.previousSibling.previousElementSibling.dataset.likes
+    likesText = event.target.previousSibling.previousElementSibling
+    likeNum = parseInt(likeNumStr) + 1
+    likeNumStr= likeNum
+    const id= event.target.parentElement.dataset.id
+    updateLikes(id,likeNumStr).then(like => {
+      // debugger
+      likesText.innerText = 'likes:' + likeNumStr
+
+    })
+  }
+
+}
+  )
+
 
 addBtn.addEventListener('click', () => {
   // hide & seek with the form
@@ -45,31 +56,57 @@ addBtn.addEventListener('click', () => {
 // OR HERE!
 
 const form = document.querySelector(".add-toy-form");
-const theText = form[0];
-const theImg = form[1];
 
-
-let whatsTheValue =(event)=>{
-  event.preventDefault();
-  debugger
-  console.log(theText);
-  // form.reset()
-  }
 
   
-// const addNewToy =(name, url)=>{
-//   fetch("http://localhost:3000/toys",
-//   {
-//     method: 'POST',
-//     headers: {
-//       "Content - Type" : "application/json",
-//       "Accept" : "application/json"
-//     },
-//     body:  JSON.stringify({
-      
-//     })
-//   }).then(resp => resp.json()).then(toys => setUpDivs(toys) )
+const addNewToy =(toyName, imageName)=>{
+  return fetch('http://localhost:3000/toys', {
+    method: 'POST',
+    headers: { 
+	'Content-Type' : 'application/json',
+    'Accept': 'application/json'	
 
-// };
+},
+body: JSON.stringify({
+	name: toyName,
+	image: imageName,
+	likes: 0
+        
+})
+    
+})
 
-form.addEventListener('submit', whatsTheValue)
+}
+  
+  fetch("http://localhost:3000/toys",addNewToy).then(resp => resp.json())
+
+
+form.addEventListener("submit", (event) =>{
+  // event.preventDefault();
+  const toyName = event.target.name.value
+  const imageName = event.target.image.value
+  addNewToy(toyName,imageName).then(toy =>
+    toys.forEach(toy => {
+      mainDiv.innerHTML += divs(toy.id, toy.name, toy.image, toy.likes);})
+    )
+  toyName = ""
+  imageName = ""
+  
+}
+)
+const updateLikes =(id,addedLike) =>{
+  return fetch(`http://localhost:3000/toys/${id}`, {
+    method:'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+  },
+  body: JSON.stringify({
+    likes: addedLike
+
+  })
+
+
+  })
+
+}
